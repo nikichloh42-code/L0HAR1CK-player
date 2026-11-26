@@ -13,6 +13,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Unpack project zip
+        run: unzip -o MusicPlayer.zip
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -23,12 +26,17 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Build Debug APK
-        run: chmod +x gradlew && ./gradlew assembleDebug
+        run: |
+          GRADLEW_PATH=$(find . -maxdepth 3 -name "gradlew" | head -n 1)
+          PROJECT_DIR=$(dirname "$GRADLEW_PATH")
+          cd "$PROJECT_DIR"
+          chmod +x gradlew
+          ./gradlew assembleDebug
 
       - name: Upload APK artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          path: "**/build/outputs/apk/debug/*.apk"
           
